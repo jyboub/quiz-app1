@@ -47,11 +47,13 @@ async function loadQuestion() {
 
     // Parser ce texte en JSON pour obtenir {question, answers, correctAnswer}
     let question;
-    try {
-      question = JSON.parse(texteGenere);
-    } catch (e) {
-      throw new Error("La réponse de l'IA n'est pas un JSON valide.");
-    }
+try {
+  // Retire les balises Markdown ```json ... ``` si présentes
+  const texteNettoye = texteGenere.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+  question = JSON.parse(texteNettoye);
+} catch (e) {
+  throw new Error("La réponse de l'IA n'est pas un JSON valide.");
+}
 
     validateQuestion(question);
 
