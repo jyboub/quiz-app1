@@ -1,37 +1,77 @@
-const questions = [
-  {
-    question: "Quelle est la capitale de la France ?",
-    answers: ["Paris", "Lyon", "Marseille"],
-    correct: "Paris"
-  },
-  {
-    question: "Quel est le plus grand fleuve du monde ?",
-    answers: ["Amazone", "Nil", "Congo"],
-    correct: "Amazone"
-  },
-  {
-    question: "Combien font 5 × 6 ?",
-    answers: ["25", "30", "36"],
-    correct: "30"
-  }
-];
+const TOTAL_QUESTIONS = 5;
+
+// À remplacer par l'URL réelle de votre proxy Vercel
+const PROXY_URL = "https://votre-proxy.vercel.app/api/generate-question";
 
 let currentQuestionIndex = 0;
 let score = 0;
+let currentQuestion = null;
 let answered = false;
 
-function displayQuestion() {
+async function loadQuestion() {
   answered = false;
 
-  const currentQuestion = questions[currentQuestionIndex];
-
-  document.getElementById("question").textContent = currentQuestion.question;
-  document.getElementById("progression").textContent =
-    `Question ${currentQuestionIndex + 1} / ${questions.length}`;
-  document.getElementById("score").textContent =
-    `Score : ${score} / ${questions.length}`;
+  document.getElementById("question").textContent = "Génération de la question...";
+  document.getElementById("answers").innerHTML = "";
   document.getElementById("feedback").textContent = "";
+  document.getElementById("error").textContent = "";
   document.getElementById("nextBtn").disabled = true;
+
+  updateHeader();
+
+  try {
+    const response = await fetch(PROXY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        theme: "culture générale",
+        level: "facile"
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error("Le proxy IA ne répond pas correctement.");
+    }
+
+    const data = await response.json();
+
+    validateQuestion(data);
+
+    currentQuestion = data;
+    displayQuestion();
+
+  } catch (error) {
+    showError("Impossible de générer une question. Réessayez plus tard.");
+    console.error(error);
+  }
+}
+
+function validateQuestion(data) {
+  if (!data.question) {
+    throw new Error("Question manquante.");
+  }
+
+  if (!Array.isArray(data.answers)) {
+    throw new Error("Liste de réponses invalide.");
+  }
+
+  if (data.answers.length < 2) {
+    throw new Error("Nombre de réponses insuffisant.");
+  }
+
+  if (!data.correctAnswer) {
+    throw new Error("Bonne réponse manquante.");
+  }
+
+  if (!data.answers.includes(data.correctAnswer)) {
+    throw new Error("La bonne réponse n'est pas dans les choix.");
+  }
+}
+
+function displayQuestion() {
+  document.getElementById("question").textContent = currentQuestion.question;
 
   const answersContainer = document.getElementById("answers");
   answersContainer.innerHTML = "";
@@ -49,18 +89,17 @@ function checkAnswer(button, selectedAnswer) {
 
   answered = true;
 
-  const currentQuestion = questions[currentQuestionIndex];
   const buttons = document.querySelectorAll("#answers button");
 
   buttons.forEach(btn => {
     btn.disabled = true;
 
-    if (btn.textContent === currentQuestion.correct) {
+    if (btn.textContent === currentQuestion.correctAnswer) {
       btn.classList.add("correct");
     }
   });
 
-  if (selectedAnswer === currentQuestion.correct) {
+  if (selectedAnswer === currentQuestion.correctAnswer) {
     score++;
     button.classList.add("correct");
     document.getElementById("feedback").textContent = "Correct !";
@@ -69,30 +108,34 @@ function checkAnswer(button, selectedAnswer) {
     document.getElementById("feedback").textContent = "Incorrect.";
   }
 
-  document.getElementById("score").textContent =
-    `Score : ${score} / ${questions.length}`;
-
+  updateHeader();
   document.getElementById("nextBtn").disabled = false;
 }
 
 function nextQuestion() {
   currentQuestionIndex++;
 
-  if (currentQuestionIndex < questions.length) {
-    displayQuestion();
+  if (currentQuestionIndex < TOTAL_QUESTIONS) {
+    loadQuestion();
   } else {
     showFinalResult();
   }
 }
 
-function showFinalResult() {
-  document.querySelector(".quiz-header").style.display = "none";
-  document.querySelector(".question-box").innerHTML =
-    `<h2>Quiz terminé</h2>`;
+function updateHeader() {
+  document.getElementById("progression").textContent =
+    `Question ${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS}`;
 
+  document.getElementById("score").textContent =
+    `Score : ${score} / ${TOTAL_QUESTIONS}`;
+}
+
+function showFinalResult() {
+  document.getElementById("question").textContent = "Quiz terminé";
   document.getElementById("answers").innerHTML = "";
   document.getElementById("feedback").textContent =
-    `Score final : ${score} / ${questions.length}`;
+    `Score final : ${score} / ${TOTAL_QUESTIONS}`;
+  document.getElementById("error").textContent = "";
 
   document.getElementById("nextBtn").textContent = "Recommencer";
   document.getElementById("nextBtn").disabled = false;
@@ -103,11 +146,17 @@ function restartQuiz() {
   currentQuestionIndex = 0;
   score = 0;
 
-  document.querySelector(".quiz-header").style.display = "flex";
   document.getElementById("nextBtn").textContent = "Suivant →";
   document.getElementById("nextBtn").onclick = nextQuestion;
 
-  displayQuestion();
+  loadQuestion();
 }
 
-displayQuestion();
+function showError(message) {
+  document.getElementById("question").textContent = "Erreur de génération";
+  document.getElementById("answers").innerHTML = "";
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("error").textContent = message;
+}
+
+loadQuestion();
