@@ -26,9 +26,13 @@ async function loadQuestion() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        theme: "culture générale",
-        level: "facile"
-      })
+  messages: [
+    {
+      role: "user",
+      content: `Génère une question de quiz de culture générale, niveau facile. Réponds uniquement en JSON strict, sans texte autour, avec ce format exact : {"question": "...", "answers": ["...", "...", "...", "..."], "correctAnswer": "..."}`,
+    }
+  ]
+})
     });
 
     if (!response.ok) {
