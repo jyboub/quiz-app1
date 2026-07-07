@@ -1,7 +1,7 @@
 const TOTAL_QUESTIONS = 5;
 
 // À remplacer par l'URL réelle de votre proxy Vercel
-const PROXY_URL = " https://quiz-proxy-classe1.vercel.app/api/ask-claude";
+const PROXY_URL = " const PROXY_URL = "https://quiz-proxy1.vercel.app/api/ask-claude";";
 
 let currentQuestionIndex = 0;
 let score = 0;
