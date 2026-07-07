@@ -37,9 +37,20 @@ async function loadQuestion() {
 
     const data = await response.json();
 
-    validateQuestion(data);
+    // Extraire le texte généré par Claude
+    const texteGenere = data.content[0].text;
 
-    currentQuestion = data;
+    // Parser ce texte en JSON pour obtenir {question, answers, correctAnswer}
+    let question;
+    try {
+      question = JSON.parse(texteGenere);
+    } catch (e) {
+      throw new Error("La réponse de l'IA n'est pas un JSON valide.");
+    }
+
+    validateQuestion(question);
+
+    currentQuestion = question;
     displayQuestion();
 
   } catch (error) {
