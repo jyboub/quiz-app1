@@ -36,6 +36,7 @@ async function loadQuestion() {
     }
 
     const data = await response.json();
+    console.log("Réponse du proxy :", data);
 
     // Extraire le texte généré par Claude
     const texteGenere = data.content[0].text;
