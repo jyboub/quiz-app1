@@ -1,1 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz IA</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="quiz">
+    <!-- La question est injectée ici par script.js -->
+    <h1 id="question" class="quiz__question"></h1>
 
+    <!-- Les 4 boutons de choix sont générés dynamiquement dans cette liste -->
+    <div id="choices" class="quiz__choices"></div>
+
+    <!-- Zone de feedback : "Correct" ou "Incorrect" -->
+    <p id="feedback" class="quiz__feedback" role="status" aria-live="polite"></p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
