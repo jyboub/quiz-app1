@@ -1,161 +1,194 @@
 "use strict";
 
-/**
- * Données du quiz.
- * On utilise un tableau d'objets même s'il n'y a qu'une question pour l'instant :
- * cela permettra, dans les prochains sprints, d'enchaîner plusieurs questions,
- * de gérer un score / une progression, puis de remplacer ce tableau par des
- * questions générées par l'IA (même format JSON).
- */
 const QUESTIONS = [
   {
-    // Géographie
     question: "Quelle est la capitale de l'Australie ?",
     choices: ["Sydney", "Melbourne", "Canberra", "Perth"],
-    correctIndex: 2,
+    correctIndex: 2
   },
   {
-    // Histoire
     question: "En quelle année a eu lieu la Révolution française ?",
     choices: ["1789", "1815", "1492", "1914"],
-    correctIndex: 0,
+    correctIndex: 0
   },
   {
-    // Sciences / Physique
     question: "Quelle est la vitesse approximative de la lumière dans le vide ?",
-    choices: ["300 000 km/s", "3 000 km/s", "30 000 km/s", "3 millions km/s"],
-    correctIndex: 0,
+    choices: [
+      "300 000 km/s",
+      "3 000 km/s",
+      "30 000 km/s",
+      "3 millions km/s"
+    ],
+    correctIndex: 0
   },
   {
-    // Biologie / Corps humain
     question: "Combien d'os compte le corps humain adulte ?",
     choices: ["156", "206", "306", "106"],
-    correctIndex: 1,
+    correctIndex: 1
   },
   {
-    // Arts / Peinture
-    question: "Qui a peint « La Joconde » ?",
-    choices: ["Michel-Ange", "Raphaël", "Léonard de Vinci", "Botticelli"],
-    correctIndex: 2,
-  },
-  {
-    // Littérature
-    question: "Qui a écrit « Les Misérables » ?",
-    choices: ["Émile Zola", "Victor Hugo", "Gustave Flaubert", "Molière"],
-    correctIndex: 1,
-  },
-  {
-    // Sport
-    question: "Tous les combien d'années ont lieu les Jeux olympiques d'été ?",
-    choices: ["2 ans", "3 ans", "4 ans", "5 ans"],
-    correctIndex: 2,
-  },
-  {
-    // Chimie
-    question: "Quel est le symbole chimique de l'or ?",
-    choices: ["Ag", "Or", "Au", "Go"],
-    correctIndex: 2,
-  },
-  {
-    // Musique
-    question: "Combien de touches possède un piano standard ?",
-    choices: ["76", "88", "96", "61"],
-    correctIndex: 1,
-  },
-  {
-    // Astronomie
-    question: "Quelle est la planète la plus proche du Soleil ?",
-    choices: ["Vénus", "Mars", "Mercure", "La Terre"],
-    correctIndex: 2,
-  },
+    question: "Qui a peint La Joconde ?",
+    choices: [
+      "Michel-Ange",
+      "Raphaël",
+      "Léonard de Vinci",
+      "Botticelli"
+    ],
+    correctIndex: 2
+  }
 ];
 
-// Délai (en millisecondes) avant de passer à la question suivante après une réponse.
-const NEXT_QUESTION_DELAY = 5000;
+const DELAY = 5;
 
-// Index de la question courante.
-let currentIndex = 0;
+let currentQuestion = 0;
+let score = 0;
 
-// Référence du minuteur en cours, pour éviter les passages en double.
-let nextQuestionTimer = null;
-
-// Références aux éléments du DOM.
 const questionEl = document.getElementById("question");
 const choicesEl = document.getElementById("choices");
 const feedbackEl = document.getElementById("feedback");
+const countdownEl = document.getElementById("countdown");
 
-/**
- * Affiche la question courante et génère ses 4 boutons de choix.
- */
+const progressionEl = document.getElementById("progression");
+const scoreEl = document.getElementById("score");
+
+const resultEl = document.getElementById("result");
+const finalScoreEl = document.getElementById("finalScore");
+const restartButton = document.getElementById("restartButton");
+
+function updateHeader() {
+  progressionEl.textContent =
+    `Question ${currentQuestion + 1}/${QUESTIONS.length}`;
+
+  scoreEl.textContent =
+    `Score : ${score}/${QUESTIONS.length}`;
+}
+
 function renderQuestion() {
-  const current = QUESTIONS[currentIndex];
 
-  // Réinitialise l'affichage (utile pour la future navigation entre questions).
-  questionEl.textContent = current.question;
+  updateHeader();
+
+  const question = QUESTIONS[currentQuestion];
+
+  questionEl.textContent = question.question;
+
   feedbackEl.textContent = "";
   feedbackEl.className = "quiz__feedback";
+
+  countdownEl.textContent = "";
+
   choicesEl.innerHTML = "";
 
-  // Crée un bouton par choix.
-  current.choices.forEach((choiceText, index) => {
+  question.choices.forEach((choice, index) => {
+
     const button = document.createElement("button");
-    button.type = "button";
+
     button.className = "quiz__choice";
-    // Numérote chaque choix : "1-", "2-", "3-", "4-".
-    button.textContent = `${index + 1}- ${choiceText}`;
-    button.addEventListener("click", () => handleAnswer(index));
+    button.textContent = choice;
+
+    button.addEventListener("click", () => {
+      handleAnswer(index);
+    });
+
     choicesEl.appendChild(button);
   });
 }
 
-/**
- * Gère le clic sur un choix : affiche le feedback, colore les boutons
- * et verrouille tous les choix pour empêcher un second essai.
- * @param {number} selectedIndex - index du choix cliqué
- */
 function handleAnswer(selectedIndex) {
-  const current = QUESTIONS[currentIndex];
-  const isCorrect = selectedIndex === current.correctIndex;
-  const buttons = choicesEl.querySelectorAll(".quiz__choice");
 
-  buttons.forEach((button, index) => {
-    // Désactive tous les boutons.
+  const question = QUESTIONS[currentQuestion];
+
+  const buttons =
+    document.querySelectorAll(".quiz__choice");
+
+  buttons.forEach(button => {
     button.disabled = true;
-
-    // Le bon choix passe toujours en vert.
-    if (index === current.correctIndex) {
-      button.classList.add("quiz__choice--correct");
-    }
-
-    // Si le choix cliqué est faux, on le marque en rouge.
-    if (index === selectedIndex && !isCorrect) {
-      button.classList.add("quiz__choice--wrong");
-    }
   });
 
-  // Affiche le message dans la zone de feedback.
-  feedbackEl.textContent = isCorrect ? "Correct" : "Incorrect";
-  feedbackEl.classList.add(
-    isCorrect ? "quiz__feedback--correct" : "quiz__feedback--wrong"
-  );
+  if (selectedIndex === question.correctIndex) {
 
-  // Passe automatiquement à la question suivante après 5 secondes.
-  scheduleNextQuestion();
+    score++;
+
+    feedbackEl.textContent = "✅ Correct";
+    feedbackEl.classList.add("quiz__feedback--correct");
+
+    buttons[selectedIndex]
+      .classList.add("quiz__choice--correct");
+
+  } else {
+
+    feedbackEl.textContent = "❌ Incorrect";
+    feedbackEl.classList.add("quiz__feedback--wrong");
+
+    buttons[selectedIndex]
+      .classList.add("quiz__choice--wrong");
+
+    buttons[question.correctIndex]
+      .classList.add("quiz__choice--correct");
+  }
+
+  updateHeader();
+
+  startCountdown();
 }
 
-/**
- * Programme le passage à la question suivante après NEXT_QUESTION_DELAY.
- * On boucle sur la première question une fois la dernière atteinte.
- */
-function scheduleNextQuestion() {
-  // Sécurité : annule un éventuel minuteur déjà en cours.
-  clearTimeout(nextQuestionTimer);
+function startCountdown() {
 
-  nextQuestionTimer = setTimeout(() => {
-    currentIndex = (currentIndex + 1) % QUESTIONS.length;
-    renderQuestion();
-  }, NEXT_QUESTION_DELAY);
+  let remaining = DELAY;
+
+  countdownEl.textContent =
+    `Question suivante dans ${remaining}s`;
+
+  const timer = setInterval(() => {
+
+    remaining--;
+
+    countdownEl.textContent =
+      `Question suivante dans ${remaining}s`;
+
+    if (remaining <= 0) {
+
+      clearInterval(timer);
+
+      currentQuestion++;
+
+      if (currentQuestion < QUESTIONS.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+  }, 1000);
 }
 
-// Démarre le quiz.
+function showResults() {
+
+  questionEl.classList.add("hidden");
+  choicesEl.classList.add("hidden");
+  feedbackEl.classList.add("hidden");
+  countdownEl.classList.add("hidden");
+
+  resultEl.classList.remove("hidden");
+
+  finalScoreEl.textContent =
+    `Vous avez obtenu ${score}/${QUESTIONS.length}`;
+}
+
+function restartQuiz() {
+
+  currentQuestion = 0;
+  score = 0;
+
+  resultEl.classList.add("hidden");
+
+  questionEl.classList.remove("hidden");
+  choicesEl.classList.remove("hidden");
+  feedbackEl.classList.remove("hidden");
+  countdownEl.classList.remove("hidden");
+
+  renderQuestion();
+}
+
+restartButton.addEventListener("click", restartQuiz);
+
 renderQuestion();

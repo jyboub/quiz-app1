@@ -7,17 +7,36 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <main class="quiz">
-    <!-- La question est injectée ici par script.js -->
+
+    <div class="quiz__header">
+      <p id="progression" class="quiz__info">Question 1/5</p>
+      <p id="score" class="quiz__info">Score : 0/5</p>
+    </div>
+
     <h1 id="question" class="quiz__question"></h1>
 
-    <!-- Les 4 boutons de choix sont générés dynamiquement dans cette liste -->
     <div id="choices" class="quiz__choices"></div>
 
-    <!-- Zone de feedback : "Correct" ou "Incorrect" -->
-    <p id="feedback" class="quiz__feedback" role="status" aria-live="polite"></p>
+    <p
+      id="feedback"
+      class="quiz__feedback"
+      role="status"
+      aria-live="polite"
+    ></p>
+
+    <p id="countdown" class="quiz__countdown"></p>
+
+    <section id="result" class="quiz__result hidden">
+      <h2>Quiz terminé !</h2>
+      <p id="finalScore"></p>
+      <button id="restartButton">Recommencer</button>
+    </section>
+
   </main>
 
   <script src="script.js"></script>
+
 </body>
 </html>

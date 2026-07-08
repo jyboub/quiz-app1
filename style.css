@@ -21,110 +21,103 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: system-ui, sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
 }
 
 .quiz {
   width: 100%;
-  max-width: 48rem;
+  max-width: 900px;
   background: var(--color-surface);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(31, 41, 51, 0.08);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+}
+
+.quiz__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-weight: bold;
 }
 
 .quiz__question {
-  /* Question dans un cadre, comme sur le wireframe. */
-  margin: 0 0 1.5rem;
-  padding: 1rem 1.25rem;
-  font-size: 1.25rem;
-  line-height: 1.4;
-  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
   border: 1px solid var(--color-border);
   border-radius: 8px;
+  text-align: center;
 }
 
 .quiz__choices {
-  /* Les 4 choix alignés sur une seule ligne horizontale. */
   display: flex;
   gap: 1rem;
 }
 
 .quiz__choice {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 3.5rem;
-  padding: 0.85rem 1rem;
-  font-size: 1rem;
-  font-weight: 500;
-  text-align: center;
-  color: var(--color-text);
-  background: var(--color-surface);
+  padding: 1rem;
   border: 1px solid var(--color-border);
   border-radius: 8px;
+  background: white;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s,
-    transform 0.05s;
+  transition: 0.2s;
 }
 
 .quiz__choice:hover:not(:disabled) {
   border-color: var(--color-accent);
-  box-shadow: 0 4px 14px rgba(47, 111, 235, 0.15);
-  transform: translateY(-2px);
-}
-
-.quiz__choice:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.quiz__choice:disabled {
-  cursor: default;
 }
 
 .quiz__choice--correct {
-  border-color: var(--color-correct);
   background: var(--color-correct-bg);
-  color: var(--color-correct);
-  font-weight: 600;
+  border-color: var(--color-correct);
 }
 
 .quiz__choice--wrong {
-  border-color: var(--color-wrong);
   background: var(--color-wrong-bg);
-  color: var(--color-wrong);
-  font-weight: 600;
+  border-color: var(--color-wrong);
 }
 
 .quiz__feedback {
-  /* Zone de feedback en cadre pleine largeur, sous les choix. */
-  margin: 1.5rem 0 0;
-  padding: 1rem 1.25rem;
-  min-height: 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  min-height: 40px;
+  margin-top: 1rem;
   text-align: center;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .quiz__feedback--correct {
   color: var(--color-correct);
-  border-color: var(--color-correct);
-  background: var(--color-correct-bg);
 }
 
 .quiz__feedback--wrong {
   color: var(--color-wrong);
-  border-color: var(--color-wrong);
-  background: var(--color-wrong-bg);
 }
 
-/* Sur petit écran, les choix repassent en colonne. */
-@media (max-width: 40rem) {
+.quiz__countdown {
+  text-align: center;
+  font-weight: bold;
+}
+
+.quiz__result {
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+#restartButton {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: white;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
   .quiz__choices {
     flex-direction: column;
   }
