@@ -53,6 +53,7 @@ const scoreEl = document.getElementById("score");
 
 const resultEl = document.getElementById("result");
 const finalScoreEl = document.getElementById("finalScore");
+
 const restartButton = document.getElementById("restartButton");
 
 function updateHeader() {
@@ -170,8 +171,26 @@ function showResults() {
 
   resultEl.classList.remove("hidden");
 
-  finalScoreEl.textContent =
-    `Vous avez obtenu ${score}/${QUESTIONS.length}`;
+  let message = "";
+
+  if (score === 0) {
+    message = "😞 Dommage ! Vous pouvez réessayer.";
+  } else if (score === 1) {
+    message = "😞 Résultat insuffisant. Continuez à vous entraîner.";
+  } else if (score === 2) {
+    message = "😐 C'est un début, mais il reste des progrès à faire.";
+  } else if (score === 3) {
+    message = "🙂 Bon travail !";
+  } else if (score === 4) {
+    message = "🎉 Très bon résultat !";
+  } else {
+    message = "🏆 Bravo ! Score parfait !";
+  }
+
+  finalScoreEl.innerHTML = `
+    <strong>${message}</strong><br>
+    Vous avez obtenu ${score}/${QUESTIONS.length}.
+  `;
 }
 
 function restartQuiz() {
