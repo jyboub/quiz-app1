@@ -11,8 +11,8 @@
   <main class="quiz">
 
     <div class="quiz__header">
-      <p id="progression" class="quiz__info">Question 1/5</p>
-      <p id="score" class="quiz__info">Score : 0/5</p>
+      <p id="progression" class="quiz__info"></p>
+      <p id="score" class="quiz__info"></p>
     </div>
 
     <h1 id="question" class="quiz__question"></h1>
@@ -26,12 +26,18 @@
       aria-live="polite"
     ></p>
 
-    <p id="countdown" class="quiz__countdown"></p>
+    <div id="actions"></div>
 
     <section id="result" class="quiz__result hidden">
-      <h2>Quiz terminé !</h2>
+
+      <h2>🏆 Résultat du Quiz</h2>
+
       <p id="finalScore"></p>
-      <button id="restartButton">Recommencer</button>
+
+      <button id="restartButton">
+        Recommencer
+      </button>
+
     </section>
 
   </main>
