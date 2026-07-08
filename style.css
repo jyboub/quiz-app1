@@ -28,7 +28,7 @@ body {
 
 .quiz {
   width: 100%;
-  max-width: 32rem;
+  max-width: 48rem;
   background: var(--color-surface);
   padding: 2rem;
   border-radius: 12px;
@@ -36,33 +36,36 @@ body {
 }
 
 .quiz__question {
+  /* Question dans un cadre, comme sur le wireframe. */
   margin: 0 0 1.5rem;
-  font-size: 1.35rem;
+  padding: 1rem 1.25rem;
+  font-size: 1.25rem;
   line-height: 1.4;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
 }
 
 .quiz__choices {
-  display: grid;
-  /* 2 colonnes => 4 choix affichés en carré (2 lignes de 2). */
-  grid-template-columns: repeat(2, 1fr);
+  /* Les 4 choix alignés sur une seule ligne horizontale. */
+  display: flex;
   gap: 1rem;
 }
 
 .quiz__choice {
-  /* Carré : chaque choix occupe une case avec une hauteur confortable. */
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 7rem;
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.05rem;
+  min-height: 3.5rem;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
   font-weight: 500;
   text-align: center;
   color: var(--color-text);
   background: var(--color-surface);
-  border: 2px solid var(--color-border);
-  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s,
     transform 0.05s;
@@ -97,28 +100,32 @@ body {
 }
 
 .quiz__feedback {
+  /* Zone de feedback en cadre pleine largeur, sous les choix. */
   margin: 1.5rem 0 0;
+  padding: 1rem 1.25rem;
   min-height: 1.5rem;
   font-size: 1.1rem;
   font-weight: 600;
   text-align: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
 }
 
 .quiz__feedback--correct {
   color: var(--color-correct);
+  border-color: var(--color-correct);
+  background: var(--color-correct-bg);
 }
 
 .quiz__feedback--wrong {
   color: var(--color-wrong);
+  border-color: var(--color-wrong);
+  background: var(--color-wrong-bg);
 }
 
-/* Sur très petit écran, les carrés repassent en une seule colonne. */
-@media (max-width: 26rem) {
+/* Sur petit écran, les choix repassent en colonne. */
+@media (max-width: 40rem) {
   .quiz__choices {
-    grid-template-columns: 1fr;
-  }
-
-  .quiz__choice {
-    min-height: 4rem;
+    flex-direction: column;
   }
 }
