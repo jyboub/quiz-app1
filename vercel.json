@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/ask-claude.js": {
+      "maxDuration": 10
+    }
+  }
+}
