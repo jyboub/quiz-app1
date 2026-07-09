@@ -1,43 +1,26 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz ISTQB CT-AI</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz ISTQB IA</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>Quiz ISTQB IA</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Question 1 sur 5</div>
+        </div>
 
-  <main class="quiz">
-
-    <div class="quiz__header">
-      <p id="progression">Question 0/0</p>
-      <p id="score">Score : 0/0</p>
+        <div id="quizContent">
+            <!-- Le contenu du quiz sera inséré ici -->
+        </div>
     </div>
 
-    <h1 id="question">
-      Chargement...
-    </h1>
-
-    <div id="choices"></div>
-
-    <p id="feedback"></p>
-
-    <div id="actions"></div>
-
-    <section id="result" class="hidden">
-      <h2>🏆 Résultat</h2>
-
-      <p id="finalScore"></p>
-
-      <button id="restartButton">
-        Générer un nouveau quiz
-      </button>
-    </section>
-
-  </main>
-
-  <script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
