@@ -1,8 +1,18 @@
 :root {
   --primary: #4f46e5;
+  --primary-dark: #4338ca;
+
   --secondary: #7c3aed;
-  --success: #22c55e;
-  --danger: #ef4444;
+
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+
+  --danger: #dc2626;
+  --danger-bg: #fee2e2;
+
+  --light: #f8fafc;
+  --border: #d1d5db;
+  --text: #111827;
 }
 
 * {
@@ -10,8 +20,8 @@
 }
 
 body {
-
   margin: 0;
+
   min-height: 100vh;
 
   display: flex;
@@ -20,76 +30,87 @@ body {
 
   font-family: system-ui, sans-serif;
 
-  background: linear-gradient(
-    135deg,
-    #4f46e5,
-    #7c3aed
-  );
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--secondary)
+    );
+
+  padding: 20px;
 }
 
 .quiz {
 
-  width: 90%;
+  width: 100%;
   max-width: 900px;
 
   background: white;
 
   border-radius: 20px;
 
-  padding: 30px;
+  padding: 32px;
 
   box-shadow:
-    0 20px 40px rgba(0,0,0,.2);
+    0 20px 40px rgba(0,0,0,.20);
 }
 
 .quiz__header {
 
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   background: #eef2ff;
 
+  padding: 16px;
+
   border-radius: 12px;
 
-  padding: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .quiz__info {
+
   margin: 0;
-  font-weight: bold;
+
+  font-weight: 700;
+
+  color: var(--primary);
 }
 
 .quiz__question {
 
   text-align: center;
 
-  padding: 20px;
+  padding: 25px;
 
-  border: 2px solid #e5e7eb;
+  margin-bottom: 25px;
+
+  border: 2px solid var(--border);
 
   border-radius: 12px;
 
-  margin-bottom: 20px;
+  color: var(--text);
 }
 
 .quiz__choices {
 
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
 
   gap: 15px;
 }
 
 .quiz__choice {
 
-  flex: 1 1 calc(50% - 15px);
+  padding: 16px;
 
-  padding: 15px;
+  border: 2px solid var(--border);
 
   border-radius: 12px;
-
-  border: 2px solid #d1d5db;
 
   background: white;
 
@@ -97,44 +118,59 @@ body {
 
   font-size: 1rem;
 
-  transition: all .2s;
+  transition:
+    transform .2s,
+    box-shadow .2s,
+    border-color .2s;
 }
 
 .quiz__choice:hover:not(:disabled) {
 
-  transform: translateY(-3px);
+  transform: translateY(-4px);
 
   border-color: var(--primary);
 
   box-shadow:
-    0 10px 20px rgba(0,0,0,.1);
+    0 10px 20px rgba(0,0,0,.10);
+}
+
+.quiz__choice:disabled {
+  cursor: default;
 }
 
 .quiz__choice--correct {
 
-  background: var(--success);
+  background: var(--success-bg);
 
-  color: white;
+  border-color: var(--success);
+
+  color: var(--success);
+
+  font-weight: 700;
 }
 
 .quiz__choice--wrong {
 
-  background: var(--danger);
+  background: var(--danger-bg);
 
-  color: white;
+  border-color: var(--danger);
+
+  color: var(--danger);
+
+  font-weight: 700;
 }
 
 .quiz__feedback {
+
+  min-height: 30px;
 
   margin-top: 20px;
 
   text-align: center;
 
-  font-size: 1.2rem;
+  font-size: 1.15rem;
 
-  font-weight: bold;
-
-  min-height: 30px;
+  font-weight: 700;
 }
 
 .quiz__feedback--correct {
@@ -145,7 +181,7 @@ body {
   color: var(--danger);
 }
 
-#actions {
+.quiz__actions {
 
   display: flex;
   justify-content: center;
@@ -156,24 +192,33 @@ body {
 .action-btn,
 #restartButton {
 
+  border: none;
+
   background: var(--primary);
 
   color: white;
 
-  border: none;
-
-  padding: 12px 24px;
+  padding: 14px 28px;
 
   border-radius: 10px;
 
   cursor: pointer;
 
   font-size: 1rem;
+
+  transition:
+    background .2s,
+    transform .2s;
 }
 
 .action-btn:hover,
 #restartButton:hover {
-  opacity: .9;
+
+  background:
+    var(--primary-dark);
+
+  transform:
+    translateY(-2px);
 }
 
 .quiz__result {
@@ -181,29 +226,42 @@ body {
   text-align: center;
 }
 
+.quiz__result h2 {
+
+  color: var(--primary);
+
+  margin-bottom: 20px;
+}
+
 #finalScore {
 
   font-size: 1.2rem;
 
-  margin: 25px 0;
+  margin-bottom: 25px;
+
+  line-height: 1.6;
 }
 
 .hidden {
   display: none;
 }
 
-@media(max-width:700px){
+@media (max-width: 700px) {
 
-  .quiz__choices{
-    flex-direction:column;
+  .quiz__choices {
+
+    grid-template-columns: 1fr;
   }
 
-  .quiz__choice{
-    flex:1;
+  .quiz__header {
+
+    flex-direction: column;
+
+    gap: 10px;
   }
 
-  .quiz__header{
-    flex-direction:column;
-    gap:10px;
+  .quiz {
+
+    padding: 24px;
   }
 }

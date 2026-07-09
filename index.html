@@ -3,46 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz IA</title>
+  <title>Quiz ISTQB CT-AI</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <main class="quiz">
 
-    <div class="quiz__header">
+    <header class="quiz__header">
       <p id="progression" class="quiz__info"></p>
       <p id="score" class="quiz__info"></p>
-    </div>
+    </header>
 
-    <h1 id="question" class="quiz__question"></h1>
+    <section class="quiz__content">
 
-    <div id="choices" class="quiz__choices"></div>
+      <h1 id="question" class="quiz__question">
+        Chargement...
+      </h1>
 
-    <p
-      id="feedback"
-      class="quiz__feedback"
-      role="status"
-      aria-live="polite"
-    ></p>
+      <div
+        id="choices"
+        class="quiz__choices"
+      ></div>
 
-    <div id="actions"></div>
+      <p
+        id="feedback"
+        class="quiz__feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
 
-    <section id="result" class="quiz__result hidden">
+      <div
+        id="actions"
+        class="quiz__actions"
+      ></div>
+
+    </section>
+
+    <section
+      id="result"
+      class="quiz__result hidden"
+    >
 
       <h2>🏆 Résultat du Quiz</h2>
 
       <p id="finalScore"></p>
 
       <button id="restartButton">
-        Recommencer
+        Générer un nouveau quiz
       </button>
 
     </section>
 
   </main>
 
-  <script src="script.js"></script>
+  script.js"></script>
 
 </body>
 </html>
