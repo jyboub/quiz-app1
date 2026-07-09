@@ -1,6 +1,57 @@
 "use strict";
 
-let QUESTIONS = [];
+const QUESTIONS = [
+  {
+    question: "Quel est l'objectif principal du test d'un système basé sur l'IA ?",
+    choices: [
+      "Créer le modèle",
+      "Évaluer sa qualité et ses risques",
+      "Concevoir l'interface",
+      "Administrer la base de données"
+    ],
+    correctIndex: 1
+  },
+  {
+    question: "Qu'est-ce qu'un biais dans un système IA ?",
+    choices: [
+      "Une erreur réseau",
+      "Une tendance à produire des résultats injustes",
+      "Une méthode d'apprentissage",
+      "Un bug graphique"
+    ],
+    correctIndex: 1
+  },
+  {
+    question: "Quel apprentissage utilise des données étiquetées ?",
+    choices: [
+      "Supervisé",
+      "Non supervisé",
+      "Par renforcement",
+      "Statistique"
+    ],
+    correctIndex: 0
+  },
+  {
+    question: "Qu'est-ce que l'overfitting ?",
+    choices: [
+      "Le modèle généralise parfaitement",
+      "Le modèle mémorise trop les données d'entraînement",
+      "Le modèle est trop rapide",
+      "Le modèle ne possède pas assez de paramètres"
+    ],
+    correctIndex: 1
+  },
+  {
+    question: "Pourquoi la qualité des données est-elle critique ?",
+    choices: [
+      "Elle influence la qualité des prédictions",
+      "Elle réduit les coûts réseau",
+      "Elle améliore le design",
+      "Elle remplace les tests"
+    ],
+    correctIndex: 0
+  }
+];
 
 let currentQuestion = 0;
 let score = 0;
@@ -18,90 +69,7 @@ const finalScoreEl = document.getElementById("finalScore");
 
 const restartButton = document.getElementById("restartButton");
 
-function showError(message) {
-  questionEl.textContent = message;
-  choicesEl.innerHTML = "";
-  feedbackEl.textContent = "";
-  actionsEl.innerHTML = "";
-}
-
-async function generateQuestionsFromAI() {
-  try {
-    questionEl.textContent = "Chargement des questions IA...";
-
-    const response = await fetch("/api/ask-claude", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: "user",
-            content: `
-Génère exactement 5 questions ISTQB CT-AI.
-
-Réponds uniquement avec du JSON valide.
-
-Format :
-
-[
-  {
-    "question":"Question",
-    "choices":[
-      "Réponse 1",
-      "Réponse 2",
-      "Réponse 3",
-      "Réponse 4"
-    ],
-    "correctIndex":0
-  }
-]
-
-Contraintes :
-- 4 choix de réponse
-- une seule bonne réponse
-- questions différentes à chaque génération
-- niveau certification ISTQB CT-AI
-- aucune explication
-- uniquement du JSON
-`
-          }
-        ]
-      })
-    });
-
-    const data = await response.json();
-
-    if (!data.content) {
-      throw new Error("Réponse IA invalide");
-    }
-
-    const text = data.content[0]?.text;
-
-    QUESTIONS = JSON.parse(text);
-
-    if (
-      !Array.isArray(QUESTIONS) ||
-      QUESTIONS.length === 0
-    ) {
-      throw new Error("Questions invalides");
-    }
-
-    renderQuestion();
-
-  } catch (error) {
-
-    console.error(error);
-
-    showError(
-      "Impossible de générer les questions. Veuillez réessayer plus tard."
-    );
-  }
-}
-
 function updateHeader() {
-
   progressionEl.textContent =
     `Question ${currentQuestion + 1}/${QUESTIONS.length}`;
 
@@ -130,9 +98,11 @@ function renderQuestion() {
     const button =
       document.createElement("button");
 
-    button.className = "quiz__choice";
+    button.className =
+      "quiz__choice";
 
-    button.textContent = choice;
+    button.textContent =
+      choice;
 
     button.addEventListener(
       "click",
@@ -145,7 +115,8 @@ function renderQuestion() {
 
 function handleAnswer(selectedIndex) {
 
-  const current = QUESTIONS[currentQuestion];
+  const current =
+    QUESTIONS[currentQuestion];
 
   const buttons =
     document.querySelectorAll(".quiz__choice");
@@ -181,7 +152,8 @@ function handleAnswer(selectedIndex) {
     );
 
   if (
-    selectedIndex !== current.correctIndex
+    selectedIndex !==
+    current.correctIndex
   ) {
     buttons[selectedIndex]
       .classList.add(
@@ -199,7 +171,9 @@ function createNextButton() {
   actionsEl.innerHTML = "";
 
   const button =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
 
   button.className =
     "action-btn";
@@ -235,34 +209,47 @@ function createNextButton() {
 
 function showResults() {
 
-  questionEl.classList.add("hidden");
-  choicesEl.classList.add("hidden");
-  feedbackEl.classList.add("hidden");
-  actionsEl.classList.add("hidden");
+  questionEl.classList.add(
+    "hidden"
+  );
 
-  resultEl.classList.remove("hidden");
+  choicesEl.classList.add(
+    "hidden"
+  );
+
+  feedbackEl.classList.add(
+    "hidden"
+  );
+
+  actionsEl.classList.add(
+    "hidden"
+  );
+
+  resultEl.classList.remove(
+    "hidden"
+  );
 
   let message = "";
 
   if (score <= 1) {
 
     message =
-      "😞 Résultat insuffisant. Continuez votre préparation CT-AI.";
+      "😞 Résultat insuffisant. Continuez vos révisions.";
 
   } else if (score === 2) {
 
     message =
-      "😐 Peut mieux faire. Quelques notions restent à consolider.";
+      "😐 Peut mieux faire.";
 
   } else if (score === 3) {
 
     message =
-      "🙂 Bon travail ! Les bases sont acquises.";
+      "🙂 Bon travail !";
 
   } else if (score === 4) {
 
     message =
-      "🎉 Très bon résultat ! Vous êtes proche du niveau certification.";
+      "🎉 Très bon résultat !";
 
   } else {
 
@@ -277,19 +264,32 @@ function showResults() {
   `;
 }
 
-async function restartQuiz() {
+function restartQuiz() {
 
   currentQuestion = 0;
   score = 0;
 
-  resultEl.classList.add("hidden");
+  resultEl.classList.add(
+    "hidden"
+  );
 
-  questionEl.classList.remove("hidden");
-  choicesEl.classList.remove("hidden");
-  feedbackEl.classList.remove("hidden");
-  actionsEl.classList.remove("hidden");
+  questionEl.classList.remove(
+    "hidden"
+  );
 
-  await generateQuestionsFromAI();
+  choicesEl.classList.remove(
+    "hidden"
+  );
+
+  feedbackEl.classList.remove(
+    "hidden"
+  );
+
+  actionsEl.classList.remove(
+    "hidden"
+  );
+
+  renderQuestion();
 }
 
 restartButton.addEventListener(
@@ -297,4 +297,4 @@ restartButton.addEventListener(
   restartQuiz
 );
 
-generateQuestionsFromAI();
+renderQuestion();
