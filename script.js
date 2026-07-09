@@ -1,5 +1,11 @@
 "use strict";
 
+// URL du proxy IA.
+// - En local (vercel dev) ou si le front est servi par Vercel : laisser "/api/ask-claude".
+// - Sur GitHub Pages (front séparé du proxy) : remplacer par l'URL absolue Vercel,
+//   ex : "https://VOTRE-PROJET.vercel.app/api/ask-claude".
+const PROXY_URL = "/api/ask-claude";
+
 let QUESTIONS = [];
 
 let currentQuestion = 0;
@@ -38,12 +44,44 @@ function showError(message) {
 
   choicesEl.innerHTML = "";
 
+  feedbackEl.textContent = "";
+
+  // Bouton « Réessayer » : relance la génération sans recharger la page.
   actionsEl.innerHTML = "";
 
-  feedbackEl.textContent = "";
+  const retry =
+    document.createElement("button");
+
+  retry.className =
+    "next-btn";
+
+  retry.textContent =
+    "Réessayer";
+
+  retry.addEventListener(
+    "click",
+    generateQuestionsFromAI
+  );
+
+  actionsEl.appendChild(retry);
+}
+
+/**
+ * Réaffiche la vue quiz et masque l'écran de résultat.
+ * Nécessaire au redémarrage depuis l'écran de résultat (où ces
+ * éléments ont été masqués par showResults()).
+ */
+function showQuizView() {
+  resultEl.classList.add("hidden");
+  questionEl.classList.remove("hidden");
+  choicesEl.classList.remove("hidden");
+  feedbackEl.classList.remove("hidden");
+  actionsEl.classList.remove("hidden");
 }
 
 async function generateQuestionsFromAI() {
+
+  showQuizView();
 
   try {
 
@@ -51,7 +89,7 @@ async function generateQuestionsFromAI() {
       "Chargement des questions IA...";
 
     const response =
-      await fetch("/api/ask-claude", {
+      await fetch(PROXY_URL, {
         method: "POST",
         headers: {
           "Content-Type":
@@ -79,14 +117,28 @@ Réponds uniquement avec du JSON.
         })
       });
 
+    // Le proxy peut renvoyer une 404 (chemin introuvable) ou une 5xx :
+    // on le détecte explicitement plutôt que de laisser JSON.parse planter.
+    if (!response.ok) {
+      throw new Error(`Proxy indisponible (HTTP ${response.status})`);
+    }
+
     const data =
       await response.json();
 
     const text =
       data?.content?.[0]?.text;
 
+    if (!text) {
+      throw new Error("Réponse de l'IA vide ou inattendue");
+    }
+
     QUESTIONS =
-      JSON.parse(text);
+      parseQuestions(text);
+
+    if (!Array.isArray(QUESTIONS) || QUESTIONS.length === 0) {
+      throw new Error("Aucune question exploitable dans la réponse IA");
+    }
 
     currentQuestion = 0;
     score = 0;
@@ -100,6 +152,30 @@ Réponds uniquement avec du JSON.
     showError(
       "Impossible de générer les questions. Veuillez réessayer plus tard."
     );
+  }
+}
+
+/**
+ * Extrait et parse le tableau JSON renvoyé par l'IA.
+ * L'IA entoure souvent le JSON de texte ou de balises ```json ... ``` :
+ * on isole le premier '[' et le dernier ']' avant de parser.
+ * @param {string} text - texte brut renvoyé par l'IA
+ * @returns {Array} tableau de questions
+ */
+function parseQuestions(text) {
+  // Tentative directe.
+  try {
+    return JSON.parse(text);
+  } catch (_) {
+    // On extrait le bloc entre le premier '[' et le dernier ']'.
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+
+    if (start === -1 || end === -1 || end < start) {
+      throw new Error("Aucun tableau JSON trouvé dans la réponse IA");
+    }
+
+    return JSON.parse(text.slice(start, end + 1));
   }
 }
 
