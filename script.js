@@ -1,27 +1,50 @@
 "use strict";
 
-// URL du proxy IA.
-// - En local (vercel dev) ou si le front est servi par Vercel : laisser "/api/ask-claude".
-// - Sur GitHub Pages (front séparé du proxy) : remplacer par l'URL absolue Vercel,
-//   ex : "https://VOTRE-PROJET.vercel.app/api/ask-claude".
-const PROXY_URL = "/api/ask-claude";
-
-let QUESTIONS = [];
+const QUESTIONS = [
+  {
+    question: "Quelle est la capitale de l'Australie ?",
+    choices: ["Sydney", "Melbourne", "Canberra", "Perth"],
+    correctIndex: 2
+  },
+  {
+    question: "En quelle année a eu lieu la Révolution française ?",
+    choices: ["1789", "1815", "1492", "1914"],
+    correctIndex: 0
+  },
+  {
+    question: "Quelle est la vitesse approximative de la lumière dans le vide ?",
+    choices: [
+      "300 000 km/s",
+      "3 000 km/s",
+      "30 000 km/s",
+      "3 millions km/s"
+    ],
+    correctIndex: 0
+  },
+  {
+    question: "Combien d'os compte le corps humain adulte ?",
+    choices: ["156", "206", "306", "106"],
+    correctIndex: 1
+  },
+  {
+    question: "Qui a peint La Joconde ?",
+    choices: [
+      "Michel-Ange",
+      "Raphaël",
+      "Léonard de Vinci",
+      "Botticelli"
+    ],
+    correctIndex: 2
+  }
+];
 
 let currentQuestion = 0;
 let score = 0;
 
-const questionEl =
-  document.getElementById("question");
-
-const choicesEl =
-  document.getElementById("choices");
-
-const feedbackEl =
-  document.getElementById("feedback");
-
-const actionsEl =
-  document.getElementById("actions");
+const questionEl = document.getElementById("question");
+const choicesEl = document.getElementById("choices");
+const feedbackEl = document.getElementById("feedback");
+const actionsEl = document.getElementById("actions");
 
 const progressionEl =
   document.getElementById("progression");
@@ -38,147 +61,6 @@ const finalScoreEl =
 const restartButton =
   document.getElementById("restartButton");
 
-function showError(message) {
-
-  questionEl.textContent = message;
-
-  choicesEl.innerHTML = "";
-
-  feedbackEl.textContent = "";
-
-  // Bouton « Réessayer » : relance la génération sans recharger la page.
-  actionsEl.innerHTML = "";
-
-  const retry =
-    document.createElement("button");
-
-  retry.className =
-    "next-btn";
-
-  retry.textContent =
-    "Réessayer";
-
-  retry.addEventListener(
-    "click",
-    generateQuestionsFromAI
-  );
-
-  actionsEl.appendChild(retry);
-}
-
-/**
- * Réaffiche la vue quiz et masque l'écran de résultat.
- * Nécessaire au redémarrage depuis l'écran de résultat (où ces
- * éléments ont été masqués par showResults()).
- */
-function showQuizView() {
-  resultEl.classList.add("hidden");
-  questionEl.classList.remove("hidden");
-  choicesEl.classList.remove("hidden");
-  feedbackEl.classList.remove("hidden");
-  actionsEl.classList.remove("hidden");
-}
-
-async function generateQuestionsFromAI() {
-
-  showQuizView();
-
-  try {
-
-    questionEl.textContent =
-      "Chargement des questions IA...";
-
-    const response =
-      await fetch(PROXY_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `
-Génère exactement 5 questions ISTQB CT-AI.
-
-Réponds uniquement avec du JSON.
-
-[
- {
-   "question":"...",
-   "choices":["...","...","...","..."],
-   "correctIndex":0
- }
-]
-`
-            }
-          ]
-        })
-      });
-
-    // Le proxy peut renvoyer une 404 (chemin introuvable) ou une 5xx :
-    // on le détecte explicitement plutôt que de laisser JSON.parse planter.
-    if (!response.ok) {
-      throw new Error(`Proxy indisponible (HTTP ${response.status})`);
-    }
-
-    const data =
-      await response.json();
-
-    const text =
-      data?.content?.[0]?.text;
-
-    if (!text) {
-      throw new Error("Réponse de l'IA vide ou inattendue");
-    }
-
-    QUESTIONS =
-      parseQuestions(text);
-
-    if (!Array.isArray(QUESTIONS) || QUESTIONS.length === 0) {
-      throw new Error("Aucune question exploitable dans la réponse IA");
-    }
-
-    currentQuestion = 0;
-    score = 0;
-
-    renderQuestion();
-
-  } catch (error) {
-
-    console.error(error);
-
-    showError(
-      "Impossible de générer les questions. Veuillez réessayer plus tard."
-    );
-  }
-}
-
-/**
- * Extrait et parse le tableau JSON renvoyé par l'IA.
- * L'IA entoure souvent le JSON de texte ou de balises ```json ... ``` :
- * on isole le premier '[' et le dernier ']' avant de parser.
- * @param {string} text - texte brut renvoyé par l'IA
- * @returns {Array} tableau de questions
- */
-function parseQuestions(text) {
-  // Tentative directe.
-  try {
-    return JSON.parse(text);
-  } catch (_) {
-    // On extrait le bloc entre le premier '[' et le dernier ']'.
-    const start = text.indexOf("[");
-    const end = text.lastIndexOf("]");
-
-    if (start === -1 || end === -1 || end < start) {
-      throw new Error("Aucun tableau JSON trouvé dans la réponse IA");
-    }
-
-    return JSON.parse(text.slice(start, end + 1));
-  }
-}
-
 function updateHeader() {
 
   progressionEl.textContent =
@@ -192,28 +74,26 @@ function renderQuestion() {
 
   updateHeader();
 
-  feedbackEl.textContent = "";
-
   actionsEl.innerHTML = "";
 
-  const q =
-    QUESTIONS[currentQuestion];
+  const current = QUESTIONS[currentQuestion];
 
   questionEl.textContent =
-    q.question;
+    current.question;
+
+  feedbackEl.textContent = "";
+  feedbackEl.className = "quiz__feedback";
 
   choicesEl.innerHTML = "";
 
-  q.choices.forEach((choice, index) => {
+  current.choices.forEach((choice, index) => {
 
     const button =
       document.createElement("button");
 
-    button.className =
-      "quiz-choice";
+    button.className = "quiz__choice";
 
-    button.textContent =
-      choice;
+    button.textContent = choice;
 
     button.addEventListener(
       "click",
@@ -224,58 +104,81 @@ function renderQuestion() {
   });
 }
 
-function handleAnswer(index) {
+function handleAnswer(selectedIndex) {
 
-  const q =
+  const current =
     QUESTIONS[currentQuestion];
 
   const buttons =
-    document.querySelectorAll(
-      ".quiz-choice"
-    );
+    document.querySelectorAll(".quiz__choice");
 
-  buttons.forEach(button => {
-    button.disabled = true;
+  buttons.forEach(btn => {
+    btn.disabled = true;
   });
 
-  if (index === q.correctIndex) {
+  if (selectedIndex === current.correctIndex) {
 
     score++;
 
     feedbackEl.textContent =
       "✅ Correct";
 
+    feedbackEl.classList.add(
+      "quiz__feedback--correct"
+    );
+
   } else {
 
     feedbackEl.textContent =
       "❌ Incorrect";
+
+    feedbackEl.classList.add(
+      "quiz__feedback--wrong"
+    );
   }
+
+  buttons[current.correctIndex]
+    .classList.add(
+      "quiz__choice--correct"
+    );
+
+  if (selectedIndex !== current.correctIndex) {
+
+    buttons[selectedIndex]
+      .classList.add(
+        "quiz__choice--wrong"
+      );
+  }
+
+  updateHeader();
 
   createNextButton();
 }
 
 function createNextButton() {
 
-  const next =
+  actionsEl.innerHTML = "";
+
+  const nextButton =
     document.createElement("button");
 
-  next.className =
-    "next-btn";
+  nextButton.className =
+    "action-btn";
 
-  next.textContent =
+  const lastQuestion =
     currentQuestion ===
-    QUESTIONS.length - 1
+    QUESTIONS.length - 1;
+
+  nextButton.textContent =
+    lastQuestion
       ? "Voir mon résultat"
       : "Question suivante";
 
-  next.addEventListener(
+  nextButton.addEventListener(
     "click",
     () => {
 
-      if (
-        currentQuestion ===
-        QUESTIONS.length - 1
-      ) {
+      if (lastQuestion) {
 
         showResults();
 
@@ -288,40 +191,71 @@ function createNextButton() {
     }
   );
 
-  actionsEl.innerHTML = "";
-
-  actionsEl.appendChild(next);
+  actionsEl.appendChild(nextButton);
 }
 
 function showResults() {
 
-  resultEl.classList.remove(
-    "hidden"
-  );
+  questionEl.classList.add("hidden");
+  choicesEl.classList.add("hidden");
+  feedbackEl.classList.add("hidden");
+  actionsEl.classList.add("hidden");
 
-  questionEl.classList.add(
-    "hidden"
-  );
+  resultEl.classList.remove("hidden");
 
-  choicesEl.classList.add(
-    "hidden"
-  );
+  let message = "";
 
-  feedbackEl.classList.add(
-    "hidden"
-  );
+  if (score <= 1) {
 
-  actionsEl.classList.add(
-    "hidden"
-  );
+    message =
+      "😞 Résultat insuffisant.";
 
-  finalScoreEl.textContent =
-    `Vous avez obtenu ${score}/${QUESTIONS.length}`;
+  } else if (score === 2) {
+
+    message =
+      "😐 Peut mieux faire.";
+
+  } else if (score === 3) {
+
+    message =
+      "🙂 Bon travail !";
+
+  } else if (score === 4) {
+
+    message =
+      "🎉 Très bon résultat !";
+
+  } else {
+
+    message =
+      "🏆 Bravo ! Score parfait !";
+  }
+
+  finalScoreEl.innerHTML = `
+    <strong>${message}</strong>
+    <br><br>
+    Vous avez obtenu ${score}/${QUESTIONS.length}
+  `;
+}
+
+function restartQuiz() {
+
+  currentQuestion = 0;
+  score = 0;
+
+  resultEl.classList.add("hidden");
+
+  questionEl.classList.remove("hidden");
+  choicesEl.classList.remove("hidden");
+  feedbackEl.classList.remove("hidden");
+  actionsEl.classList.remove("hidden");
+
+  renderQuestion();
 }
 
 restartButton.addEventListener(
   "click",
-  generateQuestionsFromAI
+  restartQuiz
 );
 
-generateQuestionsFromAI();
+renderQuestion();
