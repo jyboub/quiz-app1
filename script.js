@@ -1,3 +1,7 @@
+console.log("SCRIPT CHARGE");
+2
+alert("SCRIPT CHARGE");
+
 "use strict";
 
 const QUESTIONS = [
