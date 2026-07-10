@@ -1,48 +1,63 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz IA</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz ISTQB IA</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <div class="container">
+        <!-- Écran d'accueil - Sélection du thème -->
+        <div id="homeScreen" class="home-screen">
+            <div class="header">
+                <h1>Quiz Interactif</h1>
+                <p class="subtitle">Choisissez un thème pour commencer</p>
+            </div>
 
-  <main class="quiz">
+            <div class="selection-form">
+                <div class="form-group">
+                    <label for="themeSelect">Thème :</label>
+                    <select id="themeSelect" class="form-control">
+                        <option value="ISTQB IA">ISTQB IA</option>
+                        <option value="Géographie">Géographie</option>
+                        <option value="Gastronomie">Gastronomie</option>
+                    </select>
+                </div>
 
-    <div class="quiz__header">
-      <p id="progression" class="quiz__info"></p>
-      <p id="score" class="quiz__info"></p>
+                <div class="form-group">
+                    <label for="classSelect">Numéro de classe :</label>
+                    <select id="classSelect" class="form-control">
+                        <option value="1">Classe 1</option>
+                        <option value="2">Classe 2</option>
+                        <option value="3">Classe 3</option>
+                        <option value="4">Classe 4</option>
+                        <option value="5">Classe 5</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary btn-large" onclick="startQuiz()">Commencer le quiz</button>
+            </div>
+        </div>
+
+        <!-- Écran de quiz - Caché au démarrage -->
+        <div id="quizScreen" class="quiz-screen" style="display: none;">
+            <div class="header">
+                <h1>Quiz ISTQB IA</h1>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Question 1 sur 5</div>
+            </div>
+
+            <div id="quizContent">
+                <!-- Le contenu du quiz sera inséré ici -->
+            </div>
+        </div>
     </div>
 
-    <h1 id="question" class="quiz__question"></h1>
-
-    <div id="choices" class="quiz__choices"></div>
-
-    <p
-      id="feedback"
-      class="quiz__feedback"
-      role="status"
-      aria-live="polite"
-    ></p>
-
-    <div id="actions"></div>
-
-    <section id="result" class="quiz__result hidden">
-
-      <h2>🏆 Résultat du Quiz</h2>
-
-      <p id="finalScore"></p>
-
-      <button id="restartButton">
-        Recommencer
-      </button>
-
-    </section>
-
-  </main>
-
-  <script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
