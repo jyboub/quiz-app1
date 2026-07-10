@@ -5,91 +5,88 @@ let QUESTIONS = [];
 let currentQuestion = 0;
 let score = 0;
 
-const questionEl =
-  document.getElementById("question");
+const questionEl = document.getElementById("question");
+const choicesEl = document.getElementById("choices");
+const feedbackEl = document.getElementById("feedback");
+const actionsEl = document.getElementById("actions");
 
-const choicesEl =
-  document.getElementById("choices");
+const progressionEl = document.getElementById("progression");
+const scoreEl = document.getElementById("score");
 
-const feedbackEl =
-  document.getElementById("feedback");
+const resultEl = document.getElementById("result");
+const finalScoreEl = document.getElementById("finalScore");
 
-const actionsEl =
-  document.getElementById("actions");
-
-const progressionEl =
-  document.getElementById("progression");
-
-const scoreEl =
-  document.getElementById("score");
-
-const resultEl =
-  document.getElementById("result");
-
-const finalScoreEl =
-  document.getElementById("finalScore");
-
-const restartButton =
-  document.getElementById("restartButton");
+const restartButton = document.getElementById("restartButton");
 
 function showError(message) {
-
   questionEl.textContent = message;
-
   choicesEl.innerHTML = "";
-
-  actionsEl.innerHTML = "";
-
   feedbackEl.textContent = "";
+  actionsEl.innerHTML = "";
 }
 
 async function generateQuestionsFromAI() {
-
   try {
+    questionEl.textContent = "Chargement des questions IA...";
 
-    questionEl.textContent =
-      "Chargement des questions IA...";
-
-    const response =
-      await fetch("/api/ask-claude", {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `
+    const response = await fetch("/api/ask-claude", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: `
 Génère exactement 5 questions ISTQB CT-AI.
 
-Réponds uniquement avec du JSON.
+Réponds uniquement avec du JSON valide.
+
+Format :
 
 [
- {
-   "question":"...",
-   "choices":["...","...","...","..."],
-   "correctIndex":0
- }
+  {
+    "question":"Question",
+    "choices":[
+      "Réponse 1",
+      "Réponse 2",
+      "Réponse 3",
+      "Réponse 4"
+    ],
+    "correctIndex":0
+  }
 ]
+
+Contraintes :
+- 4 choix de réponse
+- une seule bonne réponse
+- questions différentes à chaque génération
+- niveau certification ISTQB CT-AI
+- aucune explication
+- uniquement du JSON
 `
-            }
-          ]
-        })
-      });
+          }
+        ]
+      })
+    });
 
-    const data =
-      await response.json();
+    const data = await response.json();
 
-    const text =
-      data?.content?.[0]?.text;
+    if (!data.content) {
+      throw new Error("Réponse IA invalide");
+    }
 
-    QUESTIONS =
-      JSON.parse(text);
+    const text = data.content[0]?.text;
 
-    currentQuestion = 0;
-    score = 0;
+    QUESTIONS = JSON.parse(text);
+
+    if (
+      !Array.isArray(QUESTIONS) ||
+      QUESTIONS.length === 0
+    ) {
+      throw new Error("Questions invalides");
+    }
 
     renderQuestion();
 
@@ -116,28 +113,26 @@ function renderQuestion() {
 
   updateHeader();
 
-  feedbackEl.textContent = "";
-
   actionsEl.innerHTML = "";
 
-  const q =
-    QUESTIONS[currentQuestion];
+  const current = QUESTIONS[currentQuestion];
 
   questionEl.textContent =
-    q.question;
+    current.question;
+
+  feedbackEl.textContent = "";
+  feedbackEl.className = "quiz__feedback";
 
   choicesEl.innerHTML = "";
 
-  q.choices.forEach((choice, index) => {
+  current.choices.forEach((choice, index) => {
 
     const button =
       document.createElement("button");
 
-    button.className =
-      "quiz-choice";
+    button.className = "quiz__choice";
 
-    button.textContent =
-      choice;
+    button.textContent = choice;
 
     button.addEventListener(
       "click",
@@ -148,58 +143,81 @@ function renderQuestion() {
   });
 }
 
-function handleAnswer(index) {
+function handleAnswer(selectedIndex) {
 
-  const q =
-    QUESTIONS[currentQuestion];
+  const current = QUESTIONS[currentQuestion];
 
   const buttons =
-    document.querySelectorAll(
-      ".quiz-choice"
-    );
+    document.querySelectorAll(".quiz__choice");
 
-  buttons.forEach(button => {
-    button.disabled = true;
+  buttons.forEach(btn => {
+    btn.disabled = true;
   });
 
-  if (index === q.correctIndex) {
+  if (selectedIndex === current.correctIndex) {
 
     score++;
 
     feedbackEl.textContent =
       "✅ Correct";
 
+    feedbackEl.classList.add(
+      "quiz__feedback--correct"
+    );
+
   } else {
 
     feedbackEl.textContent =
       "❌ Incorrect";
+
+    feedbackEl.classList.add(
+      "quiz__feedback--wrong"
+    );
   }
+
+  buttons[current.correctIndex]
+    .classList.add(
+      "quiz__choice--correct"
+    );
+
+  if (
+    selectedIndex !== current.correctIndex
+  ) {
+    buttons[selectedIndex]
+      .classList.add(
+        "quiz__choice--wrong"
+      );
+  }
+
+  updateHeader();
 
   createNextButton();
 }
 
 function createNextButton() {
 
-  const next =
+  actionsEl.innerHTML = "";
+
+  const button =
     document.createElement("button");
 
-  next.className =
-    "next-btn";
+  button.className =
+    "action-btn";
 
-  next.textContent =
+  const lastQuestion =
     currentQuestion ===
-    QUESTIONS.length - 1
+    QUESTIONS.length - 1;
+
+  button.textContent =
+    lastQuestion
       ? "Voir mon résultat"
       : "Question suivante";
 
-  next.addEventListener(
+  button.addEventListener(
     "click",
     () => {
 
-      if (
-        currentQuestion ===
-        QUESTIONS.length - 1
-      ) {
+      if (lastQuestion) {
 
         showResults();
 
@@ -212,40 +230,71 @@ function createNextButton() {
     }
   );
 
-  actionsEl.innerHTML = "";
-
-  actionsEl.appendChild(next);
+  actionsEl.appendChild(button);
 }
 
 function showResults() {
 
-  resultEl.classList.remove(
-    "hidden"
-  );
+  questionEl.classList.add("hidden");
+  choicesEl.classList.add("hidden");
+  feedbackEl.classList.add("hidden");
+  actionsEl.classList.add("hidden");
 
-  questionEl.classList.add(
-    "hidden"
-  );
+  resultEl.classList.remove("hidden");
 
-  choicesEl.classList.add(
-    "hidden"
-  );
+  let message = "";
 
-  feedbackEl.classList.add(
-    "hidden"
-  );
+  if (score <= 1) {
 
-  actionsEl.classList.add(
-    "hidden"
-  );
+    message =
+      "😞 Résultat insuffisant. Continuez votre préparation CT-AI.";
 
-  finalScoreEl.textContent =
-    `Vous avez obtenu ${score}/${QUESTIONS.length}`;
+  } else if (score === 2) {
+
+    message =
+      "😐 Peut mieux faire. Quelques notions restent à consolider.";
+
+  } else if (score === 3) {
+
+    message =
+      "🙂 Bon travail ! Les bases sont acquises.";
+
+  } else if (score === 4) {
+
+    message =
+      "🎉 Très bon résultat ! Vous êtes proche du niveau certification.";
+
+  } else {
+
+    message =
+      "🏆 Excellent ! Vous semblez prêt pour l'examen.";
+  }
+
+  finalScoreEl.innerHTML = `
+    <strong>${message}</strong>
+    <br><br>
+    Vous avez obtenu ${score}/${QUESTIONS.length}
+  `;
+}
+
+async function restartQuiz() {
+
+  currentQuestion = 0;
+  score = 0;
+
+  resultEl.classList.add("hidden");
+
+  questionEl.classList.remove("hidden");
+  choicesEl.classList.remove("hidden");
+  feedbackEl.classList.remove("hidden");
+  actionsEl.classList.remove("hidden");
+
+  await generateQuestionsFromAI();
 }
 
 restartButton.addEventListener(
   "click",
-  generateQuestionsFromAI
+  restartQuiz
 );
 
 generateQuestionsFromAI();

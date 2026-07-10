@@ -10,34 +10,54 @@
 
   <main class="quiz">
 
-    <div class="quiz__header">
-      <p id="progression">Question 0/0</p>
-      <p id="score">Score : 0/0</p>
-    </div>
+    <header class="quiz__header">
+      <p id="progression" class="quiz__info"></p>
+      <p id="score" class="quiz__info"></p>
+    </header>
 
-    <h1 id="question">
-      Chargement...
-    </h1>
+    <section class="quiz__content">
 
-    <div id="choices"></div>
+      <h1 id="question" class="quiz__question">
+        Chargement...
+      </h1>
 
-    <p id="feedback"></p>
+      <div
+        id="choices"
+        class="quiz__choices"
+      ></div>
 
-    <div id="actions"></div>
+      <p
+        id="feedback"
+        class="quiz__feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
 
-    <section id="result" class="hidden">
-      <h2>🏆 Résultat</h2>
+      <div
+        id="actions"
+        class="quiz__actions"
+      ></div>
+
+    </section>
+
+    <section
+      id="result"
+      class="quiz__result hidden"
+    >
+
+      <h2>🏆 Résultat du Quiz</h2>
 
       <p id="finalScore"></p>
 
       <button id="restartButton">
         Générer un nouveau quiz
       </button>
+
     </section>
 
   </main>
 
-  <script src="script.js"></script>
+  script.js"></script>
 
 </body>
 </html>
